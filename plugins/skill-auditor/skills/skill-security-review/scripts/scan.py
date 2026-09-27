@@ -56,7 +56,7 @@ PATTERNS = [
     ("secrets", "high", r"(keychain|security\s+find-generic-password|credential(s)?\.json|\.git-credentials)"),
     ("secrets", "medium", r"(\.env\b|api[_-]?key|secret[_-]?key|access[_-]?token|password|passwd|bearer\s)"),
     ("secrets", "medium", r"\b(ANTHROPIC|OPENAI|GITHUB|GH|AWS|GOOGLE)_[A-Z_]*(KEY|TOKEN|SECRET)\b"),
-    ("filesystem", "medium", r"(\$HOME|~/|%USERPROFILE%|%APPDATA%|/etc/|/Users/|C:\\\\Users)"),
+    ("filesystem", "medium", r"(\$HOME|~/|%USERPROFILE%|%APPDATA%|/etc/|/Users/|[A-Za-z]:\\{1,2}Users)"),
     ("destructive", "high", r"\brm\s+-(rf|fr|r)\b|\bRemove-Item\b.*-Recurse|shutil\.rmtree|\brmdir\s+/s"),
     ("destructive", "high", r"\b(sudo|doas|mkfs|dd\s+if=|chmod\s+(-R\s+)?777|chown\s+-R)\b"),
     ("persistence", "high", r"(crontab|launchctl|LaunchAgents|systemctl|schtasks|\.bashrc|\.zshrc|\.bash_profile|\.profile\b|RunOnce)"),
@@ -317,6 +317,9 @@ def main(argv=None):
         print("error: not a folder: %s" % args.folder, file=sys.stderr)
         return 2
     rep = scan(args.folder, args.max_bytes)
+    # Windows consoles default to a legacy code page; reported text can hold any Unicode.
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     if args.format == "json":
         json.dump(rep, sys.stdout, indent=2, ensure_ascii=False)
         sys.stdout.write("\n")

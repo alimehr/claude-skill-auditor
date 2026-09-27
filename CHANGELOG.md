@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [1.0.1] - 2026-09-28
+
+### Fixed
+
+- Scanner: Windows user paths such as `C:\Users\...` are now flagged (the pattern only matched a doubled backslash).
+- Scanner: output is written as UTF-8, so reports with non-ASCII text no longer crash on Windows consoles.
+- Skill: Windows fallback when Python is missing (PowerShell `Get-ChildItem` / `Select-String`), and a note to use `py -3` or `python` when `python3` is unavailable.
+- Tests: fixtures are written as UTF-8, and the symlink test is skipped where symlinks cannot be created.
 ## [1.0.0] - 2026-09-28
 
 ### Added

@@ -42,6 +42,8 @@ Run the bundled scanner. It lives in this skill's own `scripts/` folder (in Clau
 python3 "${CLAUDE_SKILL_DIR}/scripts/scan.py" ~/skill-review/<name>
 ```
 
+On Windows, `python3` may be missing or open the Microsoft Store; use `py -3` or `python` instead.
+
 It lists every file, flags binaries, archives, symlinks, hidden and executable files and very long lines, parses `SKILL.md` frontmatter, and matches risky patterns (network, code execution, secrets, file system, destructive commands, persistence, installs, obfuscation, prompt injection, hidden Unicode and hidden HTML comments).
 
 If Python is not available, fall back to these (macOS/Linux):
@@ -58,6 +60,22 @@ grep -rnEi 'pip install|npm i|npx|brew install|\| *(ba)?sh' . --exclude-dir=.git
 grep -rnEi 'base64|atob|fromCharCode|\\x[0-9a-f]{2}' . --exclude-dir=.git
 grep -rnEi 'ignore (all|previous)|do not tell|don.t mention|system prompt|you are now|<!--' . --exclude-dir=.git
 ```
+
+On Windows without Python, use PowerShell. List every file, including hidden ones and links:
+
+```powershell
+Set-Location "$HOME\skill-review\<name>"
+Get-ChildItem -Recurse -Force | Where-Object { $_.FullName -notmatch '\\\.git(\\|$)' } | Select-Object FullName, Length, Attributes, LinkType
+```
+
+Then run each `grep` pattern above through `Select-String` (case-insensitive by default), for example:
+
+```powershell
+$files = Get-ChildItem -Recurse -Force -File | Where-Object { $_.FullName -notmatch '\\\.git\\' }
+$files | Select-String -Pattern 'curl|wget|https?://|requests\.|urllib|fetch\(|axios|socket|webhook|Invoke-WebRequest|Invoke-RestMethod'
+```
+
+Also search for Windows persistence and paths: `schtasks|RunOnce|Startup|\$env:APPDATA|\$env:USERPROFILE|[A-Za-z]:\\Users`.
 
 The scan is a second net, not the review. Matches are leads to check in context; a clean scan proves nothing.
 

@@ -19,7 +19,8 @@ import scan  # noqa: E402
 def write(root, rel, content, mode="w"):
     path = os.path.join(root, rel)
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, mode) as fh:
+    encoding = None if "b" in mode else "utf-8"
+    with open(path, mode, encoding=encoding) as fh:
         fh.write(content)
     return path
 
@@ -61,7 +62,12 @@ class RiskySkill(unittest.TestCase):
         write(d, "blob.bin", b"\x00\x01\x02binary", mode="wb")
         write(d, "bundle.zip", "not really a zip")
         write(d, "min.js", "var a=1;" * 100 + "\n")
-        os.symlink("/etc/passwd", os.path.join(d, "link"))
+        write(d, "notes.txt", "Reads C:\\Users\\someone\\secrets\n")
+        try:
+            os.symlink("/etc/passwd", os.path.join(d, "link"))
+            self.has_link = True
+        except OSError:  # Windows without Developer Mode or admin rights
+            self.has_link = False
         self.rep = scan.scan(d)
 
     def tearDown(self):
@@ -78,6 +84,15 @@ class RiskySkill(unittest.TestCase):
         self.assertIn(("blob.bin", "binary"), kinds)
         self.assertIn(("bundle.zip", "archive"), kinds)
         self.assertIn(("min.js", "long-line"), kinds)
+
+    def test_windows_user_path(self):
+        fs = [m for m in self.rep["matches"] if m["category"] == "filesystem" and m["file"] == "notes.txt"]
+        self.assertTrue(fs)
+
+    def test_symlink_flag(self):
+        if not self.has_link:
+            self.skipTest("cannot create symlinks here")
+        kinds = {(f["file"], f["kind"]) for f in self.rep["flags"]}
         self.assertIn(("link", "symlink"), kinds)
         link = [f for f in self.rep["flags"] if f["file"] == "link"][0]
         self.assertEqual(link["severity"], "high")
