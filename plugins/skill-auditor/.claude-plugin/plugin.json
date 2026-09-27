@@ -1,0 +1,14 @@
+{
+  "name": "skill-auditor",
+  "displayName": "Skill Auditor",
+  "version": "1.0.0",
+  "description": "Quarantine, audit and safely install third-party Claude skills. Read-only review with a risk report before anything is installed.",
+  "author": {
+    "name": "alimehr",
+    "url": "https://github.com/alimehr"
+  },
+  "homepage": "https://github.com/alimehr/claude-skill-auditor",
+  "repository": "https://github.com/alimehr/claude-skill-auditor",
+  "license": "Apache-2.0",
+  "keywords": ["security", "skills", "audit", "supply-chain", "prompt-injection", "review"]
+}

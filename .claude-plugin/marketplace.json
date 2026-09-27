@@ -1,0 +1,15 @@
+{
+  "name": "claude-skill-auditor",
+  "description": "Review third-party Claude skills for safety before you install them",
+  "owner": {
+    "name": "alimehr",
+    "url": "https://github.com/alimehr"
+  },
+  "plugins": [
+    {
+      "name": "skill-auditor",
+      "source": "./plugins/skill-auditor",
+      "description": "Quarantine, audit and safely install third-party Claude skills"
+    }
+  ]
+}
